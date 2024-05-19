@@ -1,0 +1,92 @@
+https://www.digitalocean.com/community/tutorials/how-to-install-lamp-stack-on-ubuntu
+
+sudo apt install apache2
+sudo ufw app list
+sudo ufw allow in "Apache"
+sudo ufw enable
+sudo ufw status
+
+sudo apt install mysql-server
+sudo mysql
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+CREATE USER 'algebra'@'localhost' IDENTIFIED BY 'algebra';
+GRANT ALL PRIVILEGES ON *.* TO 'algebra'@'localhost';
+exit
+
+mysql -u algebra -p
+SHOW databases;
+CREATE database algebra_test;
+USE algebra_test;
+exit
+
+sudo apt install php libapache2-mod-php php-mysql
+sudo apt-get install php-pdo php-intl php-gd php-xml php-json php-mbstring php-tokenizer php-fileinfo php-opcache
+
+sudo mkdir /var/www/algebra_test
+sudo chown -R $USER:$USER /var/www/algebra_test
+sudo nano /etc/apache2/sites-available/algebra_test.conf
+
+<VirtualHost *:80>
+    ServerAdmin algebra@localhost
+    DocumentRoot /var/www/algebra_test
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    <Directory /var/www/algebra_test>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    # Add Alias for phpMyAdmin
+    Alias /phpmyadmin /usr/share/phpmyadmin
+    <Directory /usr/share/phpmyadmin>
+        Options FollowSymLinks
+        DirectoryIndex index.php
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+sudo a2ensite algebra_test
+sudo a2dissite 000-default
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+nano /var/www/algebra_test/index.html
+
+<html>
+  <head>
+    <title>Algebra Test Website</title>
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+
+    <p>This is the landing page of <strong>Algebra Test</strong>.</p>
+  </body>
+</html>
+
+nano /var/www/algebra_test/index.php
+
+<?php
+phpinfo();
+
+sudo systemctl reload apache2
+
+
+nano /var/www/algebra_test/.htaccess
+
+RewriteEngine On
+
+# Redirect from /test1 to /test2
+RewriteRule ^test1/?$ /test2 [R=301,L]
+
+# Remove .php extension
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^/]+)/?$ $1.php [L]
+
+# Error handling
+ErrorDocument 404 /404.html
+
+sudo a2enmod rewrite
+
+sudo systemctl reload apache2

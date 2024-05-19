@@ -1,0 +1,71 @@
+Install Homebrew:
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Install Apache:
+brew install httpd
+
+Start Apache:
+sudo apachectl start
+# or: sudo brew services start httpd
+
+Verify Apache:
+Open your web browser and go to http://localhost.
+You should see the default Apache welcome page if Apache is running correctly.
+
+Install MySQL:
+brew install mysql
+
+Start MySQL:
+brew services start mysql
+
+Install PHP:
+brew install php
+
+/opt/homebrew/etc/httpd/httpd.conf ->
+	Listen 8080 -> Listen 80
+	Include /opt/homebrew/etc/httpd/extra/httpd-vhosts.conf
+	Include /opt/homebrew/etc/httpd/extra/httpd-php.conf
+	LoadModule rewrite_module lib/httpd/modules/mod_rewrite.so
+	LoadModule php_module /opt/homebrew/opt/php/lib/httpd/modules/libphp.so
+
+/opt/homebrew/etc/httpd/extra/httpd-php.conf ->
+	<IfModule php_module>
+	  <FilesMatch \.php$>
+	    SetHandler application/x-httpd-php
+	  </FilesMatch>
+
+	  <IfModule dir_module>
+	    DirectoryIndex index.html index.php
+	  </IfModule>
+	</IfModule>
+
+/opt/homebrew/etc/httpd/extra/httpd-vhosts.conf ->
+	<VirtualHost *:80>
+	    ServerAdmin algebra@localhost
+	    DocumentRoot /opt/homebrew/var/www/algebra_test
+	    ErrorLog ${APACHE_LOG_DIR}/error.log
+	    CustomLog ${APACHE_LOG_DIR}/access.log combined
+	
+	    <Directory /opt/homebrew/var/www/algebra_test>
+	        Options Indexes FollowSymLinks
+	        AllowOverride All
+	        Require all granted
+	    </Directory>
+	</VirtualHost>
+
+sudo chown -R :www /opt/homebrew/var/www
+sudo chmod -R g+w /opt/homebrew/var/www
+
+Verify PHP:
+Create a PHP file in Apache's document root directory (usually /opt/homebrew/var/www) with the following content:
+<?php phpinfo(); ?>
+Save this file as info.php, then access it in your browser by navigating to http://localhost/info.php. You should see the PHP information page.
+
+Install PHPMyAdmin:
+brew install phpmyadmin
+ln -s /usr/local/share/phpmyadmin /usr/local/var/www/phpmyadmin
+sudo apachectl restart
+
+Access PHPMyAdmin: You can now access PHPMyAdmin by navigating to http://localhost/phpmyadmin in your web browser.
+
+echo "127.0.0.1   algebra.test" | sudo tee -a /etc/hosts

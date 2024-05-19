@@ -1,0 +1,9 @@
+https://learn.microsoft.com/en-us/windows/wsl/install
+
+U APLIKACIJI POWERSHELL:
+wsl -l -o
+wsl --install <verzija>
+wsl -d <verzija>
+
+UNINSTALL:
+wsl --unregister <verzija>
